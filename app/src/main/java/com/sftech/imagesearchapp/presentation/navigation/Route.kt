@@ -6,9 +6,6 @@ object Route {
 
 
 
-
-
-
     fun previewImageWithId(imageId : String) = "image_preview_screen/$imageId"
 
 

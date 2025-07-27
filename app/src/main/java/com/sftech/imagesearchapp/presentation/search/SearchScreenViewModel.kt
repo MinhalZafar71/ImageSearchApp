@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sftech.imagesearchapp.domain.model.ImageItem
 import com.sftech.imagesearchapp.domain.use_case.SearchImagesUseCase
-import com.sftech.imagesearchapp.presentation.navigation.Route
 import com.sftech.imagesearchapp.presentation.navigation.Route.previewImageWithId
 import com.sftech.imagesearchapp.util.Resource
 import com.sftech.imagesearchapp.util.UiEvent

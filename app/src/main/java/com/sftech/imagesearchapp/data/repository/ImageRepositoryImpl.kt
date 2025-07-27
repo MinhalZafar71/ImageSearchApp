@@ -13,7 +13,7 @@ class ImageRepositoryImpl @Inject constructor(
 ) : ImageRepository {
     override suspend fun searchImage(query: String): Result<List<ImageItem>> {
         return try {
-            val searchDto = api.searchImages(query = query, apiKey = BuildConfig.API_KEY, imageType = "photo")
+            val searchDto = api.searchImages(query = query, apiKey = BuildConfig.API_KEY, imageType = "all")
             Result.success(searchDto.toDomainList())
         } catch (e: Exception) {
             e.printStackTrace()
@@ -23,7 +23,7 @@ class ImageRepositoryImpl @Inject constructor(
 
     override suspend fun searchSingleImage(imageId: String): Result<ImageItem> {
         return try {
-            val searchDto = api.searchSingleImage(id = imageId, apiKey = BuildConfig.API_KEY, imageType = "photo")
+            val searchDto = api.searchSingleImage(id = imageId, apiKey = BuildConfig.API_KEY, imageType = "all")
             Result.success(searchDto.toDomainList().first())
         }catch (e: Exception){
             e.printStackTrace()

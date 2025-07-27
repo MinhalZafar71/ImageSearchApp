@@ -14,10 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewScreen
 import com.sftech.imagesearchapp.presentation.navigation.Route
+import com.sftech.imagesearchapp.presentation.navigation.handleUiEvent
 import com.sftech.imagesearchapp.presentation.navigation.navigates
 import com.sftech.imagesearchapp.presentation.search.SearchScreen
 import com.sftech.imagesearchapp.presentation.ui.theme.ImageSearchAppTheme
@@ -44,8 +48,12 @@ class MainActivity : ComponentActivity() {
                         composable(Route.SEARCH) {
                             SearchScreen(onNavigate = navController::navigates)
                         }
-                        composable (Route.PREVIEW_IMAGE){
-
+                        composable (
+                            route = Route.PREVIEW_IMAGE,
+                            arguments = listOf(navArgument("imageId") { type = NavType.StringType })
+                        ){ backStackEntry ->
+                            val imageId = backStackEntry.arguments?.getString("imageId") ?: ""
+                            ImagePreviewScreen(onNavigate = navController::handleUiEvent, imageId = imageId)
                         }
                     }
                 }

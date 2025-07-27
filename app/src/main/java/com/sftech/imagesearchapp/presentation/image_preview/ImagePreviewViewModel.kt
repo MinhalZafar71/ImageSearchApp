@@ -8,6 +8,9 @@ import com.sftech.imagesearchapp.util.Resource
 import com.sftech.imagesearchapp.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -19,6 +22,8 @@ class ImagePreviewViewModel @Inject constructor(
     private val searchSingleImageUseCase: SearchSingleImageUseCase
 ) : ViewModel() {
 
+    private val _previewScreenState = MutableStateFlow<ImagePreviewScreenState>(ImagePreviewScreenState.Loading)
+    val imagePreviewScreenState: StateFlow<ImagePreviewScreenState> = _previewScreenState.asStateFlow()
 
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
@@ -26,23 +31,28 @@ class ImagePreviewViewModel @Inject constructor(
 
     fun loadImageDetails(imageId: String) {
         viewModelScope.launch {
-            searchSingleImageUseCase.invoke(imageId = imageId).map { resources ->
-                when (resources) {
-                    is Resource.Success -> {
-                        resources.data?.let { image ->
-                            ImagePreviewScreenState.Success(image)
-                        } ?: ImagePreviewScreenState.Error("Empty response")
-                    }
+            searchSingleImageUseCase.invoke(imageId = imageId)
+                .map { resources ->
+                    when (resources) {
+                        is Resource.Success -> {
+                            resources.data?.let { image ->
+                                ImagePreviewScreenState.Success(image)
+                            } ?: ImagePreviewScreenState.Error("Empty response")
+                        }
 
-                    is Resource.Error -> {
-                        ImagePreviewScreenState.Error(resources.message ?: "Unknown Error")
-                    }
+                        is Resource.Error -> {
+                            ImagePreviewScreenState.Error(resources.message ?: "Unknown Error")
+                        }
 
-                    is Resource.Loading -> {
-                        ImagePreviewScreenState.Loading
+                        is Resource.Loading -> {
+                            ImagePreviewScreenState.Loading
+                        }
                     }
                 }
-            }
+                .collect { screenState ->
+                    _previewScreenState.value = screenState
+                }
+
         }
     }
 
@@ -51,9 +61,13 @@ class ImagePreviewViewModel @Inject constructor(
             is ImagePreviewEvent.OnDownloadImage -> TODO()
             is ImagePreviewEvent.OnSaveImage -> TODO()
             is ImagePreviewEvent.OnShareImage -> TODO()
+            ImagePreviewEvent.OnBackButtonClick -> {
+                viewModelScope.launch {
+                    _uiEvent.send(UiEvent.NavigateUp)
+                }
+            }
         }
     }
-
 
     // State definition
     sealed interface ImagePreviewScreenState {
@@ -61,6 +75,7 @@ class ImagePreviewViewModel @Inject constructor(
         data class Success(val images: ImageItem) : ImagePreviewScreenState
         data class Error(val message: String) : ImagePreviewScreenState
     }
+
 
 }
 
