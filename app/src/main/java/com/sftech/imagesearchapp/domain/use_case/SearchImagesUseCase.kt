@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class GetImageUseCase @Inject constructor(private val imageRepository: ImageRepository) {
+class SearchImagesUseCase @Inject constructor(private val imageRepository: ImageRepository) {
 
     operator fun invoke(query: String): Flow<Resource<List<ImageItem>>> = flow {
         emit(Resource.Loading(""))

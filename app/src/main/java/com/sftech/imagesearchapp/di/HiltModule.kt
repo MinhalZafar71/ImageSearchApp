@@ -4,7 +4,8 @@ import com.sftech.imagesearchapp.data.remote.OpenImageApi
 import com.sftech.imagesearchapp.data.remote.OpenImageApi.Companion.BASE_URL
 import com.sftech.imagesearchapp.data.repository.ImageRepositoryImpl
 import com.sftech.imagesearchapp.domain.repository.ImageRepository
-import com.sftech.imagesearchapp.domain.use_case.GetImageUseCase
+import com.sftech.imagesearchapp.domain.use_case.SearchImagesUseCase
+import com.sftech.imagesearchapp.domain.use_case.SearchSingleImageUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -34,7 +35,13 @@ class HiltModule {
 
     @Singleton
     @Provides
-    fun provideGetImageUseCase(imageRepository: ImageRepository): GetImageUseCase{
-        return GetImageUseCase(imageRepository)
+    fun provideGetImageUseCase(imageRepository: ImageRepository): SearchImagesUseCase {
+        return SearchImagesUseCase(imageRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchSingleImageUseCase(imageRepository: ImageRepository): SearchSingleImageUseCase {
+        return SearchSingleImageUseCase(imageRepository)
     }
 }

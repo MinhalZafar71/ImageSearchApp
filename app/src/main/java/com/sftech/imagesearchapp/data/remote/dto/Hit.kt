@@ -10,7 +10,7 @@ data class Hit(
     val imageWidth: Int,
     val isAiGenerated: Boolean,
     val isGRated: Boolean,
-    val isLowQuality: Int,
+    val isLowQuality: Boolean,
     val largeImageURL: String,
     val likes: Int,
     val noAiTraining: Boolean,

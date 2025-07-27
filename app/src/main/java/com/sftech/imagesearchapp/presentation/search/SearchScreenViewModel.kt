@@ -3,12 +3,16 @@ package com.sftech.imagesearchapp.presentation.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sftech.imagesearchapp.domain.model.ImageItem
-import com.sftech.imagesearchapp.domain.use_case.GetImageUseCase
+import com.sftech.imagesearchapp.domain.use_case.SearchImagesUseCase
+import com.sftech.imagesearchapp.presentation.navigation.Route
+import com.sftech.imagesearchapp.presentation.navigation.Route.previewImageWithId
 import com.sftech.imagesearchapp.util.Resource
+import com.sftech.imagesearchapp.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,20 +22,23 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class SearchScreenViewModel @Inject constructor(
-    private val getImageUseCase: GetImageUseCase
+    private val searchImagesUseCase: SearchImagesUseCase
 ) : ViewModel() {
 
 
-    private val _state = MutableStateFlow<State>(State.Idle)
-    val state: StateFlow<State> = _state.asStateFlow()
+    private val _searchScreenState = MutableStateFlow<SearchScreenState>(SearchScreenState.Idle)
+    val searchScreenState: StateFlow<SearchScreenState> = _searchScreenState.asStateFlow()
 
-    // Search query flow with debouncing
+    private val _uiEvent = Channel<UiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+
     private val _searchQuery = MutableStateFlow("")
     private var searchJob: Job? = null
 
@@ -43,77 +50,50 @@ class SearchScreenViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun getImageList() {
 
-//        searchJob?.cancel()
-//
-//        searchJob = viewModelScope.launch {
-//            // Only debounce if it's a user search (not initial load)
-//            if (query.isNotBlank()) {
-//                delay(500L)
-//            }
-//
-//            getImageUseCase.invoke(query).collect { it ->
-//                when (it) {
-//                    is Resource.Loading -> {
-//                        _list.value = list.value.copy(isLoading = true)
-//                    }
-//
-//                    is Resource.Error -> {
-//                        _list.value = list.value.copy(
-//                            isLoading = false,
-//                            error = it.message.toString()
-//                        )
-//                    }
-//
-//                    is Resource.Success -> {
-//                        it.data?.let { item ->
-//                            _list.value = list.value.copy(
-//                                isLoading = false,
-//                                data = item,
-//                                error = ""
-//                            )
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         searchJob = viewModelScope.launch {
-            @OptIn(FlowPreview::class) _searchQuery.onStart { emit("") }.distinctUntilChanged()
-                .debounce(500.milliseconds).flatMapLatest { query ->
-                    _state.value = State.Loading
-                    getImageUseCase.invoke(query).map { resources ->
+            @OptIn(FlowPreview::class)
+            _searchQuery
+                .onStart { emit("") }
+                .distinctUntilChanged()
+                .debounce(500.milliseconds)
+                .flatMapLatest { query ->
+                    _searchScreenState.value = SearchScreenState.Loading
+                    searchImagesUseCase.invoke(query).map { resources ->
                         when (resources) {
                             is Resource.Success -> {
                                 resources.data?.let { image ->
                                     if (image.isEmpty()) {
-                                        State.Error("No images found")
+                                        SearchScreenState.Error("No images found")
                                     } else {
-                                        State.Success(image)
+                                        SearchScreenState.Success(image)
                                     }
-                                } ?: State.Error("Empty response")
+                                } ?: SearchScreenState.Error("Empty response")
                             }
 
                             is Resource.Error -> {
-                                State.Error(resources.message ?: "Unknown Error")
+                                SearchScreenState.Error(resources.message ?: "Unknown Error")
                             }
 
                             is Resource.Loading -> {
-                                State.Loading
+                                SearchScreenState.Loading
                             }
                         }
                     }.catch { e ->
-                        emit(State.Error(e.message ?: "Unknown error"))
+                        emit(SearchScreenState.Error(e.message ?: "Unknown error"))
                     }
-                }.collect { newState ->
-                    _state.value = newState
+                }
+                .collect { newState ->
+                    _searchScreenState.value = newState
                 }
         }
 
 
     }
 
+
+
     private fun triggerInitialLoad() {
-        _searchQuery.value = "" // Triggers initial load
+        _searchQuery.value = ""
     }
 
     fun onSearchQueryChanged(query: String) {
@@ -129,14 +109,19 @@ class SearchScreenViewModel @Inject constructor(
         searchJob?.cancel()
     }
 
+    fun onPreviewImageClick(imageId: String){
+        viewModelScope.launch {
+            _uiEvent.send(UiEvent.Navigate(previewImageWithId(imageId)))
+        }
+    }
 
 
     // State definition
-    sealed interface State {
-        data object Idle : State
-        data object Loading : State
-        data class Success(val images: List<ImageItem>) : State
-        data class Error(val message: String) : State
+    sealed interface SearchScreenState {
+        data object Idle : SearchScreenState
+        data object Loading : SearchScreenState
+        data class Success(val images: List<ImageItem>) : SearchScreenState
+        data class Error(val message: String) : SearchScreenState
     }
 
 }

@@ -1,4 +1,4 @@
-package com.sftech.imagesearchapp.ui.theme
+package com.sftech.imagesearchapp.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

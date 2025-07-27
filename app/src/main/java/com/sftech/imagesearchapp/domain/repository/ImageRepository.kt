@@ -6,4 +6,6 @@ interface ImageRepository {
 
     suspend fun searchImage(query: String): Result<List<ImageItem>>
 
+    suspend fun searchSingleImage(imageId: String): Result<ImageItem>
+
 }

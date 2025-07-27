@@ -4,5 +4,7 @@ data class ImageItem (
     val id: Int,
     val imageUrl: String,
     val previewImageUrl: String,
-    val tags: String
+    val tags: String,
+    val imageWidth: Int,
+    val imageHeight: Int
 )

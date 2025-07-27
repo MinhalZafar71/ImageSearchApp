@@ -1,6 +1,5 @@
-package com.sftech.imagesearchapp.ui.theme
+package com.sftech.imagesearchapp.presentation.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

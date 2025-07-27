@@ -6,10 +6,12 @@ import com.sftech.imagesearchapp.domain.model.ImageItem
 
 fun Hit.toDomain(): ImageItem {
     return ImageItem(
+        id = id,
         imageUrl = largeImageURL,
         tags = tags,
         previewImageUrl = previewURL,
-        id = id
+        imageHeight = imageHeight,
+        imageWidth = imageWidth
     )
 }
 
