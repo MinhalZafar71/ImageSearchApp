@@ -35,10 +35,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             ImageSearchAppTheme {
                 val navController = rememberNavController()
-                val snackbarHostState = remember { SnackbarHostState() }
+                val snackBarHostState = remember { SnackbarHostState() }
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    snackbarHost = { SnackbarHost(snackbarHostState) },
+                    snackbarHost = { SnackbarHost(snackBarHostState) },
                 ) { paddingValues ->
                     NavHost(
                         navController = navController,

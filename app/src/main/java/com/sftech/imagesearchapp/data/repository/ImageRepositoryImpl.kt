@@ -1,6 +1,8 @@
 package com.sftech.imagesearchapp.data.repository
 
 import com.sftech.imagesearchapp.BuildConfig
+import com.sftech.imagesearchapp.data.local.FavoriteDao
+import com.sftech.imagesearchapp.data.local.entity.FavoriteEntity
 import com.sftech.imagesearchapp.data.remote.OpenImageApi
 import com.sftech.imagesearchapp.domain.mappers.toDomainList
 import com.sftech.imagesearchapp.domain.model.ImageItem
@@ -9,7 +11,8 @@ import javax.inject.Inject
 
 
 class ImageRepositoryImpl @Inject constructor(
-    private val api: OpenImageApi
+    private val api: OpenImageApi,
+    private val dao: FavoriteDao
 ) : ImageRepository {
     override suspend fun searchImage(query: String): Result<List<ImageItem>> {
         return try {
@@ -30,4 +33,34 @@ class ImageRepositoryImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun addImageToFavorites(imageId: String) {
+        try {
+            val id = Integer.parseInt(imageId)
+            dao.addToFavorite(FavoriteEntity(id))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override suspend fun removeImageFromFavorites(imageId: String) {
+        try {
+            val id = Integer.parseInt(imageId)
+            dao.deleteFromFavorite(id)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override suspend fun isImageFavorite(imageId: String): Result<Boolean> {
+        return try {
+            val id = Integer.parseInt(imageId)
+            val result = dao.isFavorite(id)
+            Result.success(result)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
 }

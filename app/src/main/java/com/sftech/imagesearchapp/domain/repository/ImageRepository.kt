@@ -8,4 +8,10 @@ interface ImageRepository {
 
     suspend fun searchSingleImage(imageId: String): Result<ImageItem>
 
+    suspend fun addImageToFavorites(imageId: String)
+
+    suspend fun removeImageFromFavorites(imageId: String)
+
+    suspend fun isImageFavorite(imageId: String): Result<Boolean>
+
 }

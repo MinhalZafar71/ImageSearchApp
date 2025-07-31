@@ -35,11 +35,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sftech.imagesearchapp.R
 import com.sftech.imagesearchapp.presentation.search.component.ErrorContent
 import com.sftech.imagesearchapp.presentation.search.component.ImageContainer
+import com.sftech.imagesearchapp.presentation.ui.theme.TTNormFontFamily
 import com.sftech.imagesearchapp.util.UiEvent
 import com.sftech.imagesearchapp.util.showToast
 
@@ -116,7 +118,9 @@ fun SearchScreen(
                     ) {
                         Text(
                             "Enter a search term to begin",
-                            style = MaterialTheme.typography.bodyMedium
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontFamily = TTNormFontFamily,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -156,7 +160,6 @@ fun SearchScreen(
                                     .fillMaxWidth()
                                     .padding(4.dp)
                                     .clickable {
-                                        showToast(context, it.id.toString())
                                         viewModel.onPreviewImageClick(it.id.toString())
                                     },
                                 aspectRatio = aspectRatio
