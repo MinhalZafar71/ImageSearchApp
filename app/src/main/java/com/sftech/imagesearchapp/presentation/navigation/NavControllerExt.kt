@@ -12,5 +12,6 @@ fun NavController.handleUiEvent(event: UiEvent) {
     when (event) {
         is UiEvent.Navigate -> this.navigate(event.route)
         UiEvent.NavigateUp -> this.popBackStack()
+        is UiEvent.ShowSnackBar -> {}
     }
 }

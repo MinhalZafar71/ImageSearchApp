@@ -1,5 +1,7 @@
 package com.sftech.imagesearchapp.presentation.image_preview
 
+import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,12 +10,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sftech.imagesearchapp.domain.model.ImageItem
@@ -21,20 +25,48 @@ import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewViewMode
 import com.sftech.imagesearchapp.presentation.image_preview.component.AnimatedFavoriteButton
 import com.sftech.imagesearchapp.presentation.image_preview.component.BottomActionBar
 import com.sftech.imagesearchapp.presentation.image_preview.component.CircularImageButton
-import com.sftech.imagesearchapp.presentation.image_preview.component.ZoomableImagePreview
+import com.sftech.imagesearchapp.presentation.image_preview.component.ZoomableImagePreview2
 import com.sftech.imagesearchapp.presentation.search.component.ErrorContent
 import com.sftech.imagesearchapp.util.UiEvent
+import com.sftech.imagesearchapp.util.shareImageUrl
+import com.sftech.imagesearchapp.util.showToast
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ImagePreviewScreen(
     imageId: String,
     onNavigate: (UiEvent) -> Unit,
+    snackBarHostState: SnackbarHostState,
     viewModel: ImagePreviewViewModel = hiltViewModel()
 ) {
+
+    val context = LocalContext.current
 
     LaunchedEffect(imageId) {
         viewModel.loadImageDetails(imageId)
     }
+
+    LaunchedEffect(Unit) {
+        viewModel.onClickEvents.collectLatest { event ->
+            when (event) {
+                is ImagePreviewEvent.OnDownloadImage -> {
+
+                }
+
+                is ImagePreviewEvent.OnSetWallpaper -> {
+
+                }
+
+                is ImagePreviewEvent.OnShareImage -> {
+                    shareImageUrl(context = context, event.imageItem.imageUrl)
+                }
+
+                else -> Unit
+            }
+        }
+    }
+
+
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
@@ -44,6 +76,9 @@ fun ImagePreviewScreen(
                 }
                 UiEvent.NavigateUp -> {
                     onNavigate(event)
+                }
+                is UiEvent.ShowSnackBar -> {
+                    snackBarHostState.showSnackbar(message = event.message.asString(context))
                 }
             }
         }
@@ -75,7 +110,7 @@ fun ImagePreviewScreen(
                     )
                 }
 
-                ImagePreviewScreenState.Loading -> {
+                is ImagePreviewScreenState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
@@ -100,17 +135,13 @@ fun ImagePreviewSuccessContent(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        Box(
+        ZoomableImagePreview2(
+            imageItem = imageItem,
             modifier = Modifier
                 .fillMaxSize()
                 .align(Alignment.Center)
-        ) {
-            ZoomableImagePreview(
-                imageItem = imageItem,
-                modifier = Modifier
-                    .fillMaxSize()
-            )
-        }
+        )
+
 
         CircularImageButton(
             modifier = Modifier.padding(start = 20.dp),
@@ -136,8 +167,15 @@ fun ImagePreviewSuccessContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(end = 30.dp, start = 30.dp, bottom = 40.dp),
-            viewModel = viewModel,
-            imageItem = imageItem
+            onShare = {
+                viewModel.onEvent(event = ImagePreviewEvent.OnShareImage(imageItem))
+            },
+            onDownload = {
+                viewModel.onEvent(event = ImagePreviewEvent.OnDownloadImage(imageItem))
+            },
+            onWallpaper = {
+                viewModel.onEvent(event = ImagePreviewEvent.OnSetWallpaper(imageItem))
+            }
         )
 
     }

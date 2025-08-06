@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,7 +44,6 @@ import com.sftech.imagesearchapp.presentation.search.component.ErrorContent
 import com.sftech.imagesearchapp.presentation.search.component.ImageContainer
 import com.sftech.imagesearchapp.presentation.ui.theme.TTNormFontFamily
 import com.sftech.imagesearchapp.util.UiEvent
-import com.sftech.imagesearchapp.util.showToast
 
 
 /**                      1. Add voice command
@@ -56,6 +56,7 @@ import com.sftech.imagesearchapp.util.showToast
 @Composable
 fun SearchScreen(
     viewModel: SearchScreenViewModel = hiltViewModel(),
+    snackBarHostState: SnackbarHostState,
     onNavigate: (UiEvent.Navigate) -> Unit
 ) {
 
@@ -71,6 +72,10 @@ fun SearchScreen(
 
                 UiEvent.NavigateUp -> {
 
+                }
+
+                is UiEvent.ShowSnackBar -> {
+                    snackBarHostState.showSnackbar(message = event.message.asString(context))
                 }
             }
         }

@@ -7,9 +7,12 @@ import com.sftech.imagesearchapp.domain.use_case.ImageFavoriteUseCases
 import com.sftech.imagesearchapp.domain.use_case.SearchSingleImageUseCase
 import com.sftech.imagesearchapp.util.Resource
 import com.sftech.imagesearchapp.util.UiEvent
+import com.sftech.imagesearchapp.util.UiText
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
@@ -26,6 +29,9 @@ class ImagePreviewViewModel @Inject constructor(
 
     private val _previewScreenState = MutableStateFlow<ImagePreviewScreenState>(ImagePreviewScreenState.Loading)
     val imagePreviewScreenState: StateFlow<ImagePreviewScreenState> = _previewScreenState.asStateFlow()
+
+    private val _onClickEvents = MutableSharedFlow<ImagePreviewEvent>()
+    val onClickEvents: SharedFlow<ImagePreviewEvent> = _onClickEvents
 
     private val _isFavorite = MutableStateFlow(false)
     val isFavorite: StateFlow<Boolean> = _isFavorite.asStateFlow()
@@ -77,18 +83,30 @@ class ImagePreviewViewModel @Inject constructor(
 
     fun onEvent(event: ImagePreviewEvent) {
         when (event) {
-            is ImagePreviewEvent.OnDownloadImage -> TODO()
+            is ImagePreviewEvent.OnDownloadImage -> {
+                viewModelScope.launch {
+                    _onClickEvents.emit(ImagePreviewEvent.OnDownloadImage(event.imageItem))
+                }
+            }
             is ImagePreviewEvent.OnToggleFavoriteImage -> {
                 onToggleFavorite(event.imageId)
             }
-            is ImagePreviewEvent.OnShareImage -> TODO()
+            is ImagePreviewEvent.OnShareImage -> {
+                viewModelScope.launch {
+                    _onClickEvents.emit(ImagePreviewEvent.OnShareImage(event.imageItem))
+                }
+            }
             ImagePreviewEvent.OnBackButtonClick -> {
                 viewModelScope.launch {
                     _uiEvent.send(UiEvent.NavigateUp)
                 }
             }
 
-            is ImagePreviewEvent.OnSetWallpaper -> TODO()
+            is ImagePreviewEvent.OnSetWallpaper -> {
+                viewModelScope.launch {
+                    _uiEvent.send(UiEvent.ShowSnackBar(UiText.DynamicString("On Wallpaper Clicked")))
+                }
+            }
         }
     }
 

@@ -24,6 +24,5 @@ interface OpenImageApi {
 
     companion object{
         const val BASE_URL = "https://pixabay.com/"
-        const val API_KEY = "51315330-46a324aaa79419ac31852af8f"
     }
 }

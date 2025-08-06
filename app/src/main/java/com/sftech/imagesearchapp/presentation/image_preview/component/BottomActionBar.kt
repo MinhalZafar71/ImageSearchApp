@@ -13,14 +13,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.sftech.imagesearchapp.R
 import com.sftech.imagesearchapp.domain.model.ImageItem
-import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewEvent
-import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewViewModel
 
 @Composable
 fun BottomActionBar(
     modifier: Modifier = Modifier,
-    viewModel: ImagePreviewViewModel,
-    imageItem: ImageItem
+    onShare: () -> Unit,
+    onDownload: () -> Unit,
+    onWallpaper: () -> Unit,
 ) {
 
     Surface(
@@ -39,16 +38,14 @@ fun BottomActionBar(
             ActionIconButton(
                 icon = R.drawable.share_image,
                 contentDescription = "Share Button",
-                onClick = {
-                    viewModel.onEvent(event = ImagePreviewEvent.OnShareImage(imageItem.id.toString()))
-                },
+                onClick = onShare,
                 text = "Share"
             )
             ActionIconButton(
                 icon = R.drawable.download_image,
                 contentDescription = "Download Button",
                 onClick = {
-                    viewModel.onEvent(event = ImagePreviewEvent.OnDownloadImage(imageItem.id.toString()))
+                    onDownload
                 },
                 text = "Download"
             )
@@ -56,12 +53,11 @@ fun BottomActionBar(
                 icon = R.drawable.wallpaper,
                 contentDescription = "Wallpaper Button",
                 onClick = {
-                    viewModel.onEvent(event = ImagePreviewEvent.OnSetWallpaper(imageItem.id.toString()))
+                    onWallpaper
                 },
                 text = "Wallpaper"
             )
         }
-
     }
 
 
