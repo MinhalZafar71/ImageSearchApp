@@ -1,7 +1,5 @@
 package com.sftech.imagesearchapp.presentation.image_preview
 
-import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -25,6 +26,8 @@ import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewViewMode
 import com.sftech.imagesearchapp.presentation.image_preview.component.AnimatedFavoriteButton
 import com.sftech.imagesearchapp.presentation.image_preview.component.BottomActionBar
 import com.sftech.imagesearchapp.presentation.image_preview.component.CircularImageButton
+import com.sftech.imagesearchapp.presentation.image_preview.component.DownloadHandler
+import com.sftech.imagesearchapp.presentation.image_preview.component.DownloadRequest
 import com.sftech.imagesearchapp.presentation.image_preview.component.ZoomableImagePreview2
 import com.sftech.imagesearchapp.presentation.search.component.ErrorContent
 import com.sftech.imagesearchapp.util.UiEvent
@@ -37,10 +40,10 @@ fun ImagePreviewScreen(
     imageId: String,
     onNavigate: (UiEvent) -> Unit,
     snackBarHostState: SnackbarHostState,
-    viewModel: ImagePreviewViewModel = hiltViewModel()
+    viewModel: ImagePreviewViewModel = hiltViewModel(),
 ) {
-
     val context = LocalContext.current
+    var downloadRequest by remember { mutableStateOf<DownloadRequest?>(null) }
 
     LaunchedEffect(imageId) {
         viewModel.loadImageDetails(imageId)
@@ -50,11 +53,14 @@ fun ImagePreviewScreen(
         viewModel.onClickEvents.collectLatest { event ->
             when (event) {
                 is ImagePreviewEvent.OnDownloadImage -> {
-
+                    downloadRequest =
+                        DownloadRequest(
+                            imageUrl = event.imageItem.imageUrl,
+                            fileName = "downloaded_${System.currentTimeMillis()}.jpg",
+                        )
                 }
 
                 is ImagePreviewEvent.OnSetWallpaper -> {
-
                 }
 
                 is ImagePreviewEvent.OnShareImage -> {
@@ -66,11 +72,9 @@ fun ImagePreviewScreen(
         }
     }
 
-
-
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
-            when(event){
+            when (event) {
                 is UiEvent.Navigate -> {
                     onNavigate(event)
                 }
@@ -84,20 +88,28 @@ fun ImagePreviewScreen(
         }
     }
 
+    DownloadHandler(
+        context = context,
+        downloadRequest = downloadRequest,
+        onDownloadHandled = {
+            downloadRequest = null
+        },
+    )
+
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) { innerPadding ->
 
         val state by viewModel.imagePreviewScreenState.collectAsState()
 
         Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-
+            modifier =
+                Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
         ) {
-
             when (val currentState = state) {
                 is ImagePreviewScreenState.Success -> {
                     ImagePreviewSuccessContent(imageItem = currentState.images, viewModel)
@@ -106,7 +118,7 @@ fun ImagePreviewScreen(
                 is ImagePreviewScreenState.Error -> {
                     ErrorContent(
                         message = currentState.message,
-                        onRetry = { viewModel.onEvent(event = ImagePreviewEvent.OnBackButtonClick) }
+                        onRetry = { viewModel.onEvent(event = ImagePreviewEvent.OnBackButtonClick) },
                     )
                 }
 
@@ -116,32 +128,26 @@ fun ImagePreviewScreen(
                     }
                 }
             }
-
-
         }
     }
-
 }
-
 
 @Composable
 fun ImagePreviewSuccessContent(
     imageItem: ImageItem,
-    viewModel: ImagePreviewViewModel
+    viewModel: ImagePreviewViewModel,
 ) {
-
     val isFavorite by viewModel.isFavorite.collectAsState()
     val isLoadingFavorite by viewModel.isLoadingFavorite.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-
         ZoomableImagePreview2(
             imageItem = imageItem,
-            modifier = Modifier
-                .fillMaxSize()
-                .align(Alignment.Center)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .align(Alignment.Center),
         )
-
 
         CircularImageButton(
             modifier = Modifier.padding(start = 20.dp),
@@ -149,24 +155,25 @@ fun ImagePreviewSuccessContent(
             onClick = {
                 viewModel.onEvent(event = ImagePreviewEvent.OnBackButtonClick)
             },
-            contentDescription = "Back Button"
+            contentDescription = "Back Button",
         )
 
-
         AnimatedFavoriteButton(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(end = 20.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 20.dp),
             isLoading = isLoadingFavorite,
-            isFavorite = isFavorite
+            isFavorite = isFavorite,
         ) {
             viewModel.onEvent(event = ImagePreviewEvent.OnToggleFavoriteImage(imageItem.id.toString()))
         }
 
         BottomActionBar(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(end = 30.dp, start = 30.dp, bottom = 40.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(end = 30.dp, start = 30.dp, bottom = 40.dp),
             onShare = {
                 viewModel.onEvent(event = ImagePreviewEvent.OnShareImage(imageItem))
             },
@@ -175,8 +182,7 @@ fun ImagePreviewSuccessContent(
             },
             onWallpaper = {
                 viewModel.onEvent(event = ImagePreviewEvent.OnSetWallpaper(imageItem))
-            }
+            },
         )
-
     }
 }

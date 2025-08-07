@@ -21,48 +21,41 @@ fun BottomActionBar(
     onDownload: () -> Unit,
     onWallpaper: () -> Unit,
 ) {
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(40.dp),
-        color = Color.Black.copy(alpha = 0.5f)
-    )
-    {
+        color = Color.Black.copy(alpha = 0.5f),
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 2.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp),
             horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             ActionIconButton(
                 icon = R.drawable.share_image,
                 contentDescription = "Share Button",
                 onClick = onShare,
-                text = "Share"
+                text = "Share",
             )
             ActionIconButton(
                 icon = R.drawable.download_image,
                 contentDescription = "Download Button",
                 onClick = {
-                    onDownload
+                    onDownload()
                 },
-                text = "Download"
+                text = "Download",
             )
             ActionIconButton(
                 icon = R.drawable.wallpaper,
                 contentDescription = "Wallpaper Button",
                 onClick = {
-                    onWallpaper
+                    onWallpaper()
                 },
-                text = "Wallpaper"
+                text = "Wallpaper",
             )
         }
     }
-
-
 }
-
-
-
-

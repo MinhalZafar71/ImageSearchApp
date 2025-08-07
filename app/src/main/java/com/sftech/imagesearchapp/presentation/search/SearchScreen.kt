@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.icons.Icons
@@ -47,9 +48,7 @@ import com.sftech.imagesearchapp.util.UiEvent
 
 
 /**                      1. Add voice command
- *                      2. Add full screen Image
- *                      3. Add Download and share Option
- *                      4. Add local database and make item favourite option
+ *                      2. Add Download
  * */
 
 

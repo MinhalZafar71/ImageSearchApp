@@ -43,7 +43,6 @@ class SearchScreenViewModel @Inject constructor(
 
     init {
         getImageList()
-        triggerInitialLoad()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -87,12 +86,6 @@ class SearchScreenViewModel @Inject constructor(
         }
 
 
-    }
-
-
-
-    private fun triggerInitialLoad() {
-        _searchQuery.value = ""
     }
 
     fun onSearchQueryChanged(query: String) {
