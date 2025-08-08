@@ -1,39 +1,27 @@
 package com.sftech.imagesearchapp.presentation.search
 
+import android.app.Activity
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -43,35 +31,36 @@ import com.sftech.imagesearchapp.presentation.search.component.ErrorContent
 import com.sftech.imagesearchapp.presentation.search.component.ImageContainer
 import com.sftech.imagesearchapp.presentation.ui.theme.TTNormFontFamily
 import com.sftech.imagesearchapp.util.UiEvent
-import com.sftech.imagesearchapp.util.showToast
-
-
-/**                      1. Add voice command
- *                      2. Add full screen Image
- *                      3. Add Download and share Option
- *                      4. Add local database and make item favourite option
- * */
-
 
 @Composable
 fun SearchScreen(
     viewModel: SearchScreenViewModel = hiltViewModel(),
     onNavigate: (UiEvent.Navigate) -> Unit
 ) {
-
     val context = LocalContext.current
+    val query: MutableState<String> = remember { mutableStateOf("") }
+    val staggeredGridState = rememberLazyStaggeredGridState()
+    val state by viewModel.searchScreenState.collectAsState()
 
+    // Voice search launcher
+    val voiceLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val spokenText =
+                result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.get(0)
+            spokenText?.let {
+                query.value = it
+                viewModel.onSearchQueryChanged(it)
+            }
+        }
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
             when (event) {
-                is UiEvent.Navigate -> {
-                    onNavigate(event)
-                }
-
-                UiEvent.NavigateUp -> {
-
-                }
+                is UiEvent.Navigate -> onNavigate(event)
+                UiEvent.NavigateUp -> {}
             }
         }
     }
@@ -81,11 +70,6 @@ fun SearchScreen(
             .fillMaxSize()
             .background(Color(0xFFF1F4F9))
     ) { innerPadding ->
-
-
-        val query: MutableState<String> = remember { mutableStateOf("") }
-        val staggeredGridState = rememberLazyStaggeredGridState()
-        val state by viewModel.searchScreenState.collectAsState()
 
         Column(
             modifier = Modifier
@@ -105,7 +89,42 @@ fun SearchScreen(
                 enabled = true,
                 singleLine = true,
                 label = { Text(text = stringResource(R.string.query_here)) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "search Images") }
+                leadingIcon = {
+                    Icon(Icons.Default.Search, contentDescription = "Search Images",tint = Color.Unspecified)
+                },
+                trailingIcon = {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+
+                        if (query.value.isNotEmpty()) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "Clear Filter",
+                                modifier = Modifier.clickable {
+                                    query.value = ""
+                                    viewModel.onSearchQueryChanged("")
+                                }
+                            )
+                        }
+
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_google_voice),
+                            contentDescription = "Voice Search",
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clickable {
+                                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                        putExtra(
+                                            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                                        )
+                                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
+                                        putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to search")
+                                    }
+                                    voiceLauncher.launch(intent)
+                                }
+                        )
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -139,7 +158,6 @@ fun SearchScreen(
                 }
 
                 is SearchScreenViewModel.SearchScreenState.Success -> {
-
                     LazyVerticalStaggeredGrid(
                         state = staggeredGridState,
                         columns = StaggeredGridCells.Fixed(2),
@@ -149,11 +167,7 @@ fun SearchScreen(
                         horizontalArrangement = Arrangement.spacedBy(1.dp)
                     ) {
                         items(currentState.images, key = { it.id }) {
-
-                            // Calculate the aspect ratio width and height
                             val aspectRatio = it.imageWidth.toFloat() / it.imageHeight.toFloat()
-
-
                             ImageContainer(
                                 imageItem = it,
                                 modifier = Modifier
@@ -165,17 +179,9 @@ fun SearchScreen(
                                 aspectRatio = aspectRatio
                             )
                         }
-
                     }
                 }
             }
-
         }
     }
-
 }
-
-
-
-
-
