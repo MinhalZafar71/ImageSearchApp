@@ -8,12 +8,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.sftech.imagesearchapp.domain.model.ImageItem
@@ -21,48 +26,90 @@ import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewViewMode
 import com.sftech.imagesearchapp.presentation.image_preview.component.AnimatedFavoriteButton
 import com.sftech.imagesearchapp.presentation.image_preview.component.BottomActionBar
 import com.sftech.imagesearchapp.presentation.image_preview.component.CircularImageButton
-import com.sftech.imagesearchapp.presentation.image_preview.component.ZoomableImagePreview
+import com.sftech.imagesearchapp.presentation.image_preview.component.DownloadHandler
+import com.sftech.imagesearchapp.presentation.image_preview.component.DownloadRequest
+import com.sftech.imagesearchapp.presentation.image_preview.component.ZoomableImagePreview2
 import com.sftech.imagesearchapp.presentation.search.component.ErrorContent
 import com.sftech.imagesearchapp.util.UiEvent
+import com.sftech.imagesearchapp.util.shareImageUrl
+import com.sftech.imagesearchapp.util.showToast
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ImagePreviewScreen(
     imageId: String,
     onNavigate: (UiEvent) -> Unit,
-    viewModel: ImagePreviewViewModel = hiltViewModel()
+    snackBarHostState: SnackbarHostState,
+    viewModel: ImagePreviewViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
+    var downloadRequest by remember { mutableStateOf<DownloadRequest?>(null) }
 
     LaunchedEffect(imageId) {
         viewModel.loadImageDetails(imageId)
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.onClickEvents.collectLatest { event ->
+            when (event) {
+                is ImagePreviewEvent.OnDownloadImage -> {
+                    downloadRequest =
+                        DownloadRequest(
+                            imageUrl = event.imageItem.imageUrl,
+                            fileName = "downloaded_${System.currentTimeMillis()}.jpg",
+                        )
+                }
+
+                is ImagePreviewEvent.OnSetWallpaper -> {
+                }
+
+                is ImagePreviewEvent.OnShareImage -> {
+                    shareImageUrl(context = context, event.imageItem.imageUrl)
+                }
+
+                else -> Unit
+            }
+        }
+    }
+
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
-            when(event){
+            when (event) {
                 is UiEvent.Navigate -> {
                     onNavigate(event)
                 }
                 UiEvent.NavigateUp -> {
                     onNavigate(event)
                 }
+                is UiEvent.ShowSnackBar -> {
+                    snackBarHostState.showSnackbar(message = event.message.asString(context))
+                }
             }
         }
     }
 
+    DownloadHandler(
+        context = context,
+        downloadRequest = downloadRequest,
+        onDownloadHandled = {
+            downloadRequest = null
+        },
+    )
+
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize(),
     ) { innerPadding ->
 
         val state by viewModel.imagePreviewScreenState.collectAsState()
 
         Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-
+            modifier =
+                Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize(),
         ) {
-
             when (val currentState = state) {
                 is ImagePreviewScreenState.Success -> {
                     ImagePreviewSuccessContent(imageItem = currentState.images, viewModel)
@@ -71,46 +118,36 @@ fun ImagePreviewScreen(
                 is ImagePreviewScreenState.Error -> {
                     ErrorContent(
                         message = currentState.message,
-                        onRetry = { viewModel.onEvent(event = ImagePreviewEvent.OnBackButtonClick) }
+                        onRetry = { viewModel.onEvent(event = ImagePreviewEvent.OnBackButtonClick) },
                     )
                 }
 
-                ImagePreviewScreenState.Loading -> {
+                is ImagePreviewScreenState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                 }
             }
-
-
         }
     }
-
 }
-
 
 @Composable
 fun ImagePreviewSuccessContent(
     imageItem: ImageItem,
-    viewModel: ImagePreviewViewModel
+    viewModel: ImagePreviewViewModel,
 ) {
-
     val isFavorite by viewModel.isFavorite.collectAsState()
     val isLoadingFavorite by viewModel.isLoadingFavorite.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .align(Alignment.Center)
-        ) {
-            ZoomableImagePreview(
-                imageItem = imageItem,
-                modifier = Modifier
+        ZoomableImagePreview2(
+            imageItem = imageItem,
+            modifier =
+                Modifier
                     .fillMaxSize()
-            )
-        }
+                    .align(Alignment.Center),
+        )
 
         CircularImageButton(
             modifier = Modifier.padding(start = 20.dp),
@@ -118,27 +155,34 @@ fun ImagePreviewSuccessContent(
             onClick = {
                 viewModel.onEvent(event = ImagePreviewEvent.OnBackButtonClick)
             },
-            contentDescription = "Back Button"
+            contentDescription = "Back Button",
         )
 
-
         AnimatedFavoriteButton(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(end = 20.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 20.dp),
             isLoading = isLoadingFavorite,
-            isFavorite = isFavorite
+            isFavorite = isFavorite,
         ) {
             viewModel.onEvent(event = ImagePreviewEvent.OnToggleFavoriteImage(imageItem.id.toString()))
         }
 
         BottomActionBar(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(end = 30.dp, start = 30.dp, bottom = 40.dp),
-            viewModel = viewModel,
-            imageItem = imageItem
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(end = 30.dp, start = 30.dp, bottom = 40.dp),
+            onShare = {
+                viewModel.onEvent(event = ImagePreviewEvent.OnShareImage(imageItem))
+            },
+            onDownload = {
+                viewModel.onEvent(event = ImagePreviewEvent.OnDownloadImage(imageItem))
+            },
+            onWallpaper = {
+                viewModel.onEvent(event = ImagePreviewEvent.OnSetWallpaper(imageItem))
+            },
         )
-
     }
 }

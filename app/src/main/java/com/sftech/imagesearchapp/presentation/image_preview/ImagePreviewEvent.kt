@@ -1,10 +1,23 @@
 package com.sftech.imagesearchapp.presentation.image_preview
 
-sealed class ImagePreviewEvent {
+import com.sftech.imagesearchapp.domain.model.ImageItem
 
-    data class OnShareImage(val imageUri: String): ImagePreviewEvent()
-    data class OnDownloadImage(val imageUri: String): ImagePreviewEvent()
-    data class OnSetWallpaper(val imageUri: String): ImagePreviewEvent()
-    data class OnToggleFavoriteImage(val imageId: String): ImagePreviewEvent()
-    data object OnBackButtonClick: ImagePreviewEvent()
+sealed class ImagePreviewEvent {
+    data class OnShareImage(
+        val imageItem: ImageItem,
+    ) : ImagePreviewEvent()
+
+    data class OnDownloadImage(
+        val imageItem: ImageItem,
+    ) : ImagePreviewEvent()
+
+    data class OnSetWallpaper(
+        val imageItem: ImageItem,
+    ) : ImagePreviewEvent()
+
+    data class OnToggleFavoriteImage(
+        val imageId: String,
+    ) : ImagePreviewEvent()
+
+    object OnBackButtonClick : ImagePreviewEvent()
 }

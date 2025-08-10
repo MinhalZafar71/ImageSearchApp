@@ -43,17 +43,24 @@ class MainActivity : ComponentActivity() {
                     NavHost(
                         navController = navController,
                         startDestination = Route.SEARCH,
-                        modifier = Modifier.padding(paddingValues)
+                        modifier = Modifier.padding(paddingValues),
                     ) {
                         composable(Route.SEARCH) {
-                            SearchScreen(onNavigate = navController::navigates)
+                            SearchScreen(
+                                onNavigate = navController::navigates,
+                                snackBarHostState = snackBarHostState,
+                            )
                         }
-                        composable (
+                        composable(
                             route = Route.PREVIEW_IMAGE,
-                            arguments = listOf(navArgument("imageId") { type = NavType.StringType })
-                        ){ backStackEntry ->
+                            arguments = listOf(navArgument("imageId") { type = NavType.StringType }),
+                        ) { backStackEntry ->
                             val imageId = backStackEntry.arguments?.getString("imageId") ?: ""
-                            ImagePreviewScreen(onNavigate = navController::handleUiEvent, imageId = imageId)
+                            ImagePreviewScreen(
+                                onNavigate = navController::handleUiEvent,
+                                imageId = imageId,
+                                snackBarHostState = snackBarHostState,
+                            )
                         }
                     }
                 }
@@ -63,10 +70,13 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
+fun Greeting(
+    name: String,
+    modifier: Modifier = Modifier,
+) {
     Text(
         text = "Hello $name!",
-        modifier = modifier
+        modifier = modifier,
     )
 }
 

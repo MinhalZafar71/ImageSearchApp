@@ -13,60 +13,49 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.sftech.imagesearchapp.R
 import com.sftech.imagesearchapp.domain.model.ImageItem
-import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewEvent
-import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewViewModel
 
 @Composable
 fun BottomActionBar(
     modifier: Modifier = Modifier,
-    viewModel: ImagePreviewViewModel,
-    imageItem: ImageItem
+    onShare: () -> Unit,
+    onDownload: () -> Unit,
+    onWallpaper: () -> Unit,
 ) {
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(40.dp),
-        color = Color.Black.copy(alpha = 0.5f)
-    )
-    {
+        color = Color.Black.copy(alpha = 0.5f),
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 2.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp),
             horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             ActionIconButton(
                 icon = R.drawable.share_image,
                 contentDescription = "Share Button",
-                onClick = {
-                    viewModel.onEvent(event = ImagePreviewEvent.OnShareImage(imageItem.id.toString()))
-                },
-                text = "Share"
+                onClick = onShare,
+                text = "Share",
             )
             ActionIconButton(
                 icon = R.drawable.download_image,
                 contentDescription = "Download Button",
                 onClick = {
-                    viewModel.onEvent(event = ImagePreviewEvent.OnDownloadImage(imageItem.id.toString()))
+                    onDownload()
                 },
-                text = "Download"
+                text = "Download",
             )
             ActionIconButton(
                 icon = R.drawable.wallpaper,
                 contentDescription = "Wallpaper Button",
                 onClick = {
-                    viewModel.onEvent(event = ImagePreviewEvent.OnSetWallpaper(imageItem.id.toString()))
+                    onWallpaper()
                 },
-                text = "Wallpaper"
+                text = "Wallpaper",
             )
         }
-
     }
-
-
 }
-
-
-
-
