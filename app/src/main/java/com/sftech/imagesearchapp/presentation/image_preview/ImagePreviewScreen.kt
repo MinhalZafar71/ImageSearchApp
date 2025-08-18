@@ -15,25 +15,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.sftech.imagesearchapp.R
 import com.sftech.imagesearchapp.domain.model.ImageItem
 import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewViewModel.ImagePreviewScreenState
+import com.sftech.imagesearchapp.presentation.image_preview.component.ActionIconButton
 import com.sftech.imagesearchapp.presentation.image_preview.component.AnimatedFavoriteButton
 import com.sftech.imagesearchapp.presentation.image_preview.component.BottomActionBar
 import com.sftech.imagesearchapp.presentation.image_preview.component.CircularImageButton
 import com.sftech.imagesearchapp.presentation.image_preview.component.DownloadHandler
 import com.sftech.imagesearchapp.presentation.image_preview.component.DownloadRequest
+import com.sftech.imagesearchapp.presentation.image_preview.component.WallpaperOptionMenu
 import com.sftech.imagesearchapp.presentation.image_preview.component.ZoomableImagePreview2
 import com.sftech.imagesearchapp.presentation.search.component.ErrorContent
 import com.sftech.imagesearchapp.util.UiEvent
+import com.sftech.imagesearchapp.util.setWallpaper
 import com.sftech.imagesearchapp.util.shareImageUrl
-import com.sftech.imagesearchapp.util.showToast
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun ImagePreviewScreen(
@@ -44,6 +49,8 @@ fun ImagePreviewScreen(
 ) {
     val context = LocalContext.current
     var downloadRequest by remember { mutableStateOf<DownloadRequest?>(null) }
+
+
 
     LaunchedEffect(imageId) {
         viewModel.loadImageDetails(imageId)
@@ -61,6 +68,7 @@ fun ImagePreviewScreen(
                 }
 
                 is ImagePreviewEvent.OnSetWallpaper -> {
+
                 }
 
                 is ImagePreviewEvent.OnShareImage -> {
@@ -140,6 +148,10 @@ fun ImagePreviewSuccessContent(
     val isFavorite by viewModel.isFavorite.collectAsState()
     val isLoadingFavorite by viewModel.isLoadingFavorite.collectAsState()
 
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var showWallpaperMenu by remember { mutableStateOf(false) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         ZoomableImagePreview2(
             imageItem = imageItem,
@@ -180,9 +192,35 @@ fun ImagePreviewSuccessContent(
             onDownload = {
                 viewModel.onEvent(event = ImagePreviewEvent.OnDownloadImage(imageItem))
             },
-            onWallpaper = {
-                viewModel.onEvent(event = ImagePreviewEvent.OnSetWallpaper(imageItem))
-            },
+            wallpaperButton = {
+                WallpaperOptionMenu(
+                    expanded = showWallpaperMenu,
+                    onDismissRequest = { showWallpaperMenu = false },
+                    onOptionSelected = { applyToHome, applyToLock ->
+                        coroutineScope.launch {
+                            setWallpaper(
+                                context = context,
+                                imageUrl = imageItem.imageUrl,
+                                applyToLock = applyToLock,
+                                applyToHome = applyToHome
+                            )
+
+                        }
+                    },
+                    anchor = {
+
+                        ActionIconButton(
+                            icon = R.drawable.wallpaper,
+                            contentDescription = "Wallpaper Button",
+                            text = "Wallpaper",
+                            onClick = {
+                                // The button's only job is to open the menu.
+                                showWallpaperMenu = true
+                            }
+                        )
+                    }
+                )
+            }
         )
     }
 }

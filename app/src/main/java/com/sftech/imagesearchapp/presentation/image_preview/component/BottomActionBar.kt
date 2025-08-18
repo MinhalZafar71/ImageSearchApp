@@ -19,8 +19,10 @@ fun BottomActionBar(
     modifier: Modifier = Modifier,
     onShare: () -> Unit,
     onDownload: () -> Unit,
-    onWallpaper: () -> Unit,
-) {
+//    onWallpaper: () -> Unit,
+    wallpaperButton: @Composable () -> Unit,
+
+    ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(40.dp),
@@ -48,14 +50,15 @@ fun BottomActionBar(
                 },
                 text = "Download",
             )
-            ActionIconButton(
-                icon = R.drawable.wallpaper,
-                contentDescription = "Wallpaper Button",
-                onClick = {
-                    onWallpaper()
-                },
-                text = "Wallpaper",
-            )
+//            ActionIconButton(
+//                icon = R.drawable.wallpaper,
+//                contentDescription = "Wallpaper Button",
+//                onClick = {
+//                    onWallpaper()
+//                },
+//                text = "Wallpaper",
+//            )
+            wallpaperButton()
         }
     }
 }

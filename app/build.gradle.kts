@@ -91,4 +91,6 @@ dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
 
+    implementation("androidx.window:window:1.4.0")
+
 }

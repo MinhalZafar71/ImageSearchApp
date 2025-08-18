@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -50,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.sftech.imagesearchapp.R
 import com.sftech.imagesearchapp.presentation.search.component.ErrorContent
 import com.sftech.imagesearchapp.presentation.search.component.ImageContainer
+import com.sftech.imagesearchapp.presentation.search.component.ImageSearchBar
 import com.sftech.imagesearchapp.presentation.ui.theme.TTNormFontFamily
 import com.sftech.imagesearchapp.util.UiEvent
 
@@ -115,7 +117,7 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
-            OutlinedTextField(
+            /*OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(4.dp),
@@ -137,6 +139,7 @@ fun SearchScreen(
                             Icon(
                                 imageVector = Icons.Default.Clear,
                                 contentDescription = "Clear Filter",
+                                tint = LocalContentColor.current,
                                 modifier = Modifier.clickable {
                                     query.value = ""
                                     viewModel.onSearchQueryChanged("")
@@ -147,8 +150,9 @@ fun SearchScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_google_voice),
                             contentDescription = "Voice Search",
+                            tint = Color.Unspecified,
                             modifier = Modifier
-                                .padding(4.dp)
+                                .padding(8.dp)
                                 .clickable {
                                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                                         putExtra(
@@ -163,7 +167,32 @@ fun SearchScreen(
                         )
                     }
                 }
+            )*/
+
+            ImageSearchBar(
+                query = query.value,
+                onQueryChange = {
+                    query.value = it
+                    viewModel.onSearchQueryChanged(it)
+                },
+                onClear = {
+                    query.value = ""
+                    viewModel.onSearchQueryChanged("")
+                },
+                onVoiceClick = {
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
+                        putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to search")
+                    }
+                    voiceLauncher.launch(intent)
+                },
+                onSearchIme = { viewModel.onSearchQueryChanged(query.value) }, // or trigger submit
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp)
             )
+
 
             Spacer(modifier = Modifier.height(8.dp))
 
