@@ -6,7 +6,7 @@ import com.sftech.imagesearchapp.data.local.entity.FavoriteEntity
 
 @Database(
     entities = [FavoriteEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class FavoriteDatabase: RoomDatabase() {

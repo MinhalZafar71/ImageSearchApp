@@ -178,7 +178,7 @@ fun ImagePreviewSuccessContent(
             isLoading = isLoadingFavorite,
             isFavorite = isFavorite,
         ) {
-            viewModel.onEvent(event = ImagePreviewEvent.OnToggleFavoriteImage(imageItem.id.toString()))
+            viewModel.onEvent(event = ImagePreviewEvent.OnToggleFavoriteImage(imageItem))
         }
 
         BottomActionBar(

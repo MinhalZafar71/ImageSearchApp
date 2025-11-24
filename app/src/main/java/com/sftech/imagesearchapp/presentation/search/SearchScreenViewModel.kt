@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sftech.imagesearchapp.domain.model.ImageItem
 import com.sftech.imagesearchapp.domain.use_case.SearchImagesUseCase
-import com.sftech.imagesearchapp.presentation.navigation.Route.previewImageWithId
+import com.sftech.imagesearchapp.presentation.navigation.Screen.PreviewImage
 import com.sftech.imagesearchapp.util.Resource
 import com.sftech.imagesearchapp.util.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -39,11 +40,13 @@ class SearchScreenViewModel @Inject constructor(
     val uiEvent = _uiEvent.receiveAsFlow()
 
     private val _searchQuery = MutableStateFlow("")
-    private var searchJob: Job? = null
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
     init {
         getImageList()
     }
+
+    private var searchJob: Job? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun getImageList() {
@@ -54,6 +57,7 @@ class SearchScreenViewModel @Inject constructor(
                 .onStart { emit("") }
                 .distinctUntilChanged()
                 .debounce(500.milliseconds)
+                .filter { it.isNotBlank() }
                 .flatMapLatest { query ->
                     _searchScreenState.value = SearchScreenState.Loading
                     searchImagesUseCase.invoke(query).map { resources ->
@@ -103,7 +107,7 @@ class SearchScreenViewModel @Inject constructor(
 
     fun onPreviewImageClick(imageId: String){
         viewModelScope.launch {
-            _uiEvent.send(UiEvent.Navigate(previewImageWithId(imageId)))
+            _uiEvent.send(UiEvent.Navigate(PreviewImage.createRoute(imageId)))
         }
     }
 

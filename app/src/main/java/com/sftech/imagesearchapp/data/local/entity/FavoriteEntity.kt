@@ -8,6 +8,11 @@ data class FavoriteEntity(
 
     @PrimaryKey
     val imageId: Int,
+    val imageUrl: String,
+    val previewImageUrl: String,
+    val tags: String,
+    val imageWidth: Int,
+    val imageHeight: Int,
     val timeStamp: Long = System.currentTimeMillis()
 
 )

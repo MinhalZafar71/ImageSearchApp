@@ -16,7 +16,7 @@ sealed class ImagePreviewEvent {
     ) : ImagePreviewEvent()
 
     data class OnToggleFavoriteImage(
-        val imageId: String,
+        val imageItem: ImageItem,
     ) : ImagePreviewEvent()
 
     object OnBackButtonClick : ImagePreviewEvent()
