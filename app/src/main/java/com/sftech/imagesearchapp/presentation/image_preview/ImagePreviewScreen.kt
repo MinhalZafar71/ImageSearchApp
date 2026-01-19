@@ -185,7 +185,7 @@ fun ImagePreviewSuccessContent(
             modifier =
                 Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(end = 30.dp, start = 30.dp, bottom = 40.dp),
+                    .padding(end = 30.dp, start = 30.dp, bottom = 10.dp),
             onShare = {
                 viewModel.onEvent(event = ImagePreviewEvent.OnShareImage(imageItem))
             },
@@ -208,7 +208,6 @@ fun ImagePreviewSuccessContent(
                         }
                     },
                     anchor = {
-
                         ActionIconButton(
                             icon = R.drawable.wallpaper,
                             contentDescription = "Wallpaper Button",

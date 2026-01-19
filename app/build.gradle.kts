@@ -77,7 +77,7 @@ dependencies {
     ksp(libs.moshi.codegen)
 
 
-// Coil
+    // Coil
     implementation(libs.coil.compose)
 
     // Retrofit & OkHttp
@@ -86,11 +86,11 @@ dependencies {
     implementation(libs.okhttp.logging.interceptor)
     implementation(libs.retrofit.converter.moshi)
 
-// Room
+    // Room
     implementation(libs.room.ktx)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
 
-    implementation("androidx.window:window:1.4.0")
+    implementation("androidx.window:window:1.5.1")
 
 }

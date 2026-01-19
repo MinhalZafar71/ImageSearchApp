@@ -40,16 +40,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.sftech.imagesearchapp.R
 import com.sftech.imagesearchapp.domain.model.ImageItem
 import com.sftech.imagesearchapp.presentation.favorite.component.BottomSheetContent
 import com.sftech.imagesearchapp.presentation.favorite.component.BottomSheetOption
 import com.sftech.imagesearchapp.presentation.favorite.component.FavoriteImageItem
 import com.sftech.imagesearchapp.presentation.favorite.component.FavoritesTopBar
 import com.sftech.imagesearchapp.presentation.image_preview.ImagePreviewEvent
-import com.sftech.imagesearchapp.presentation.image_preview.component.ActionIconButton
 import com.sftech.imagesearchapp.presentation.image_preview.component.DownloadRequest
-import com.sftech.imagesearchapp.presentation.image_preview.component.WallpaperOptionMenu
 import com.sftech.imagesearchapp.util.UiEvent
 import com.sftech.imagesearchapp.util.setWallpaper
 import com.sftech.imagesearchapp.util.shareImageUrl

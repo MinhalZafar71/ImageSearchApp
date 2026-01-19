@@ -3,8 +3,8 @@ package com.sftech.imagesearchapp.presentation.navigation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -87,7 +87,7 @@ fun AppBottomBar(
 ) {
 
     NavigationBar(
-        containerColor = Color(0xFFF7FAF9), tonalElevation = 0.dp, modifier = Modifier.height(80.dp)
+        containerColor = Color(0xFFF7FAF9), tonalElevation = 0.dp, modifier = Modifier.wrapContentHeight() //MaterialTheme.colorScheme.surface
     ) {
 
         val navBackStackEntry by navController.currentBackStackEntryAsState()

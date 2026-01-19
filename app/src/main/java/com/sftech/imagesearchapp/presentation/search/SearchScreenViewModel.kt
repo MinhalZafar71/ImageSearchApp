@@ -18,14 +18,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+
 
 @HiltViewModel
 class SearchScreenViewModel @Inject constructor(
@@ -52,34 +53,38 @@ class SearchScreenViewModel @Inject constructor(
     private fun getImageList() {
 
         searchJob = viewModelScope.launch {
-            @OptIn(FlowPreview::class)
-            _searchQuery
-                .onStart { emit("") }
-                .distinctUntilChanged()
-                .debounce(500.milliseconds)
-                .filter { it.isNotBlank() }
-                .flatMapLatest { query ->
-                    _searchScreenState.value = SearchScreenState.Loading
-                    searchImagesUseCase.invoke(query).map { resources ->
-                        when (resources) {
-                            is Resource.Success -> {
-                                resources.data?.let { image ->
-                                    if (image.isEmpty()) {
-                                        SearchScreenState.Error("No images found")
-                                    } else {
-                                        SearchScreenState.Success(image)
-                                    }
-                                } ?: SearchScreenState.Error("Empty response")
-                            }
+            @OptIn(FlowPreview::class) _searchQuery.onStart { emit("") }.distinctUntilChanged()
+                .debounce(500.milliseconds).flatMapLatest { query ->
+                    if (query.isBlank()) {
+                        flow {
+                            emit(SearchScreenState.Idle)
+                        }
+                    } else {
+                        _searchScreenState.value = SearchScreenState.Loading
+                        searchImagesUseCase.invoke(query).map { resources ->
+                            when (resources) {
+                                is Resource.Success -> {
+                                    resources.data?.let { image ->
+                                        if (image.isEmpty()) {
+                                            SearchScreenState.Error("No images found")
+                                        } else {
+                                            SearchScreenState.Success(image)
+                                        }
+                                    } ?: SearchScreenState.Error("Empty response")
+                                }
 
-                            is Resource.Error -> {
-                                SearchScreenState.Error(resources.message ?: "Unknown Error")
-                            }
+                                is Resource.Error -> {
+                                    SearchScreenState.Error(resources.message ?: "Unknown Error")
+                                }
 
-                            is Resource.Loading -> {
-                                SearchScreenState.Loading
+                                is Resource.Loading -> {
+                                    SearchScreenState.Loading
+                                }
                             }
                         }
+
+                    }.onStart {
+                        emit(SearchScreenState.Loading)
                     }.catch { e ->
                         emit(SearchScreenState.Error(e.message ?: "Unknown error"))
                     }
@@ -97,7 +102,10 @@ class SearchScreenViewModel @Inject constructor(
     }
 
     fun retry() {
-        onSearchQueryChanged(_searchQuery.value)
+        val currentQuery = _searchQuery.value
+        if (currentQuery.isNotBlank()) {
+            onSearchQueryChanged(currentQuery)
+        }
     }
 
     override fun onCleared() {
@@ -105,7 +113,7 @@ class SearchScreenViewModel @Inject constructor(
         searchJob?.cancel()
     }
 
-    fun onPreviewImageClick(imageId: String){
+    fun onPreviewImageClick(imageId: String) {
         viewModelScope.launch {
             _uiEvent.send(UiEvent.Navigate(PreviewImage.createRoute(imageId)))
         }
@@ -121,6 +129,4 @@ class SearchScreenViewModel @Inject constructor(
     }
 
 }
-
-
 
