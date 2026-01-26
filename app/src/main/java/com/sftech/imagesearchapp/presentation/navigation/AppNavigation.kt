@@ -41,9 +41,8 @@ fun NavigationGraph(
 ) {
 
     NavHost(
-        navController = navController,
-        startDestination = Screen.Search.route,
-        modifier = Modifier.padding(paddingValues)
+        navController = navController, startDestination = Screen.Search.route,
+        modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
     ) {
 
         // -- HOME TAB --
@@ -58,6 +57,7 @@ fun NavigationGraph(
             SearchScreen(
                 onNavigate = navController::navigates,
                 snackBarHostState = snackBarHostState,
+                outerPadding = paddingValues
             )
         }
 
@@ -87,7 +87,9 @@ fun AppBottomBar(
 ) {
 
     NavigationBar(
-        containerColor = Color(0xFFF7FAF9), tonalElevation = 0.dp, modifier = Modifier.wrapContentHeight() //MaterialTheme.colorScheme.surface
+        containerColor = Color(0xFFF7FAF9),
+        tonalElevation = 0.dp,
+        modifier = Modifier.wrapContentHeight() //MaterialTheme.colorScheme.surface
     ) {
 
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -99,28 +101,28 @@ fun AppBottomBar(
 
             NavigationBarItem(
                 selected = isSelected, onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
+                navController.navigate(item.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
                     }
-                }, icon = {
-                    Icon(item.icon, contentDescription = item.label)
-                }, label = {
-                    if (isSelected) {
-                        Text(
-                            text = item.label, fontSize = 10.sp, fontWeight = FontWeight.Bold
-                        )
-                    }
-                }, colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color(0xFF051F1F),
-                    selectedTextColor = Color(0xFF191C1C),
-                    indicatorColor = Color(0xFFCCE8E7),
-                    unselectedIconColor = Color(0xFF3F4948),
-                    unselectedTextColor = Color(0xFF3F4948)
-                )
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }, icon = {
+                Icon(item.icon, contentDescription = item.label)
+            }, label = {
+                if (isSelected) {
+                    Text(
+                        text = item.label, fontSize = 10.sp, fontWeight = FontWeight.Bold
+                    )
+                }
+            }, colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = Color(0xFF051F1F),
+                selectedTextColor = Color(0xFF191C1C),
+                indicatorColor = Color(0xFFCCE8E7),
+                unselectedIconColor = Color(0xFF3F4948),
+                unselectedTextColor = Color(0xFF3F4948)
+            )
             )
         }
 

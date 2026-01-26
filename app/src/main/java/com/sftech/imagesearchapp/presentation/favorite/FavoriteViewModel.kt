@@ -77,9 +77,7 @@ sealed class FavoriteEvent {
 }
 
 enum class LayoutType(val icon: Int, val label: String) {
-    LIST(R.drawable.icon_viewcomfy, "List View"), GRID(
-        R.drawable.ic_grid,
-        "Grid View"
-    ),
+    LIST(R.drawable.icon_viewcomfy, "List View"),
+    GRID(R.drawable.ic_grid, "Grid View"),
     STAGGERED(R.drawable.ic_staggered, "Staggered View")
 }

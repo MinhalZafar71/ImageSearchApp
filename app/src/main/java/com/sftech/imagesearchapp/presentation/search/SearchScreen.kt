@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -58,7 +59,8 @@ import com.sftech.imagesearchapp.util.UiEvent
 fun SearchScreen(
     viewModel: SearchScreenViewModel = hiltViewModel(),
     snackBarHostState: SnackbarHostState,
-    onNavigate: (UiEvent.Navigate) -> Unit
+    onNavigate: (UiEvent.Navigate) -> Unit,
+    outerPadding: PaddingValues
 ) {
 
     val context = LocalContext.current
@@ -142,7 +144,10 @@ fun SearchScreen(
             modifier = Modifier
                 .background(Color.White)
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(
+                    top = innerPadding.calculateTopPadding(),
+                    bottom = outerPadding.calculateBottomPadding()
+                )
         ) {
 
             Box(
