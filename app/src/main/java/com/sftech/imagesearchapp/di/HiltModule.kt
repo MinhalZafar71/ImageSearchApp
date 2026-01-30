@@ -50,25 +50,6 @@ class HiltModule {
         return database.dao
     }
 
-
-    @Singleton
-    @Provides
-    fun provideImageRepository(api: OpenImageApi, dao: FavoriteDao): ImageRepository {
-        return ImageRepositoryImpl(api, dao)
-    }
-
-    @Singleton
-    @Provides
-    fun provideGetImageUseCase(imageRepository: ImageRepository): SearchImagesUseCase {
-        return SearchImagesUseCase(imageRepository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideSearchSingleImageUseCase(imageRepository: ImageRepository): SearchSingleImageUseCase {
-        return SearchSingleImageUseCase(imageRepository)
-    }
-
     @Provides
     @Singleton
     fun provideImageFavoriteUseCases(imageRepository: ImageRepository): ImageFavoriteUseCases {
@@ -77,12 +58,6 @@ class HiltModule {
             removeImageFromFavoriteUseCase = RemoveImageFromFavoriteUseCase(imageRepository),
             isImageFavoriteUseCase = IsImageFavoriteUseCase(imageRepository)
         )
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetFavoriteImagesUseCase(imageRepository: ImageRepository): GetFavoriteImagesUseCase {
-        return GetFavoriteImagesUseCase(imageRepository)
     }
 
 }
