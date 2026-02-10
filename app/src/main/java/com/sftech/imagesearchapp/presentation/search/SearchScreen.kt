@@ -21,8 +21,9 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -55,6 +56,7 @@ import com.sftech.imagesearchapp.util.UiEvent
  * */
 
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SearchScreen(
     viewModel: SearchScreenViewModel = hiltViewModel(),
@@ -165,7 +167,12 @@ fun SearchScreen(
                         // Check other states (Loading, Success, Error)
                         when (val currentState = state) {
                             is SearchScreenViewModel.SearchScreenState.Loading -> {
-                                CircularProgressIndicator(color = Color(0xFF006C5E))
+                                ContainedLoadingIndicator(
+                                    modifier = Modifier.size(64.dp).align(Alignment.Center),
+                                    containerColor = Color(0xFFCCE8E7),
+                                    indicatorColor = Color(0xFF051F1F),
+                                    polygons = LoadingIndicatorDefaults.IndeterminateIndicatorPolygons
+                                )
                             }
 
                             is SearchScreenViewModel.SearchScreenState.Error -> {

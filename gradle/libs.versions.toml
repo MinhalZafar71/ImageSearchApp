@@ -2,6 +2,7 @@
 agp = "8.10.1" # Or latest stable AGP you use (8.1.0 or higher)
 compiler = "1.5.15"
 coreKtx = "1.16.0"
+graphicsShapes = "1.0.1"
 hiltAndroidTesting = "2.51.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -48,12 +49,17 @@ coilCompose = "2.4.0"
 androidBuildTools = "8.1.1"
 kotlinGradlePlugin = "2.0.21" # use your main Kotlin version here
 
+# Ensure this matches your Compose/Material versioning
+material-icons = "1.7.0" # Use a stable version like 1.7.0
+
+
 
 
 [libraries]
 androidx-compiler = { module = "androidx.compose.compiler:compiler", version.ref = "compiler" }
 androidx-compose-runtime-runtime = { module = "androidx.compose.runtime:runtime" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-graphics-shapes = { module = "androidx.graphics:graphics-shapes", version.ref = "graphicsShapes" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -68,10 +74,19 @@ androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+#androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+# Use 1.5.0-alpha04 or higher to get LoadingIndicator
+androidx-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.5.0-alpha04" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+
+# Add the core icons library
+androidx-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core", version.ref = "material-icons" }
+# (Optional) Add extended icons if you use more than just the basic ones
+androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version.ref = "material-icons" }
+
 
 # Hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
